@@ -4,6 +4,10 @@
 
 #define EQUAL_INT(_a, _b)       ( ((u32)(_a)) == ((u32)(_b)) )
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /**
  * @fn      pri_count
  * @attention only private use
@@ -368,3 +372,7 @@ calculator_result_t Kim_calculator(const char* _string)
     free(_tmp);
     return the_result;
 }
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
