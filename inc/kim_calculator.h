@@ -62,7 +62,6 @@ typedef struct {
     u32 There_is_something_wrong; /* not 0 means something wrong happened */
 }calculator_result_t;
 
-# define AOPERATOR_MASK         ((u32)0xff)
 # ifndef NULL
     #define NULL ((void*)0)
 # endif /* NULL */

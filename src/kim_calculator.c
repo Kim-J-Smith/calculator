@@ -2,8 +2,6 @@
 # include <stdlib.h>
 # include <string.h>
 
-#define EQUAL_INT(_a, _b)       ( ((u32)(_a)) == ((u32)(_b)) )
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -71,6 +69,8 @@ token_t* Kim_calculator_load(const char* self, i32* OUT_num)
     memset(token_array, 0, sizeof(token_t) * _num);
 
     u32 token_ref = 0;
+    u8 allow_unary = 1; /* allow negative single number such as '-3' */
+    u16 flag_negative = 0;
     u8 flag_is_number = 0;
     u64 flag_has_point = 0; /* the bits num after '.' */
     u64 _tmp_number = 0;
@@ -90,11 +90,14 @@ token_t* Kim_calculator_load(const char* self, i32* OUT_num)
             }
             else {
                 /* use int type or float type to store the number */
+                i32 negative_factor = (flag_negative % 2) ? -1 : 1;
+                flag_negative = 0;
                 if(flag_has_point == 0) {
-                    token_array[token_ref].data.int_data = _tmp_number;
+                    token_array[token_ref].data.int_data = negative_factor * _tmp_number;
                     token_array[token_ref].flag_int_or_float = Type_int;
                 } else {
-                    token_array[token_ref].data.float_data = (double)_tmp_number / flag_has_point;
+                    token_array[token_ref].data.float_data = 
+                        negative_factor * (double)_tmp_number / flag_has_point;
                     token_array[token_ref].flag_int_or_float = Type_float;
                 }
                 _tmp_number = 0;
@@ -109,12 +112,18 @@ token_t* Kim_calculator_load(const char* self, i32* OUT_num)
             if(self[i] >= '0' && self[i] <= '9') {
                 i--;
                 flag_is_number = 1;
+                allow_unary = 0;
             }
             else if(self[i] == '+') {
                 token_array[token_ref-1].Aoperator = AOperator_add;
             }
             else if(self[i] == '-') {
-                token_array[token_ref-1].Aoperator = AOperator_sub;
+                if(allow_unary == 1) {
+                    flag_negative += 1;
+                    allow_unary = 0;
+                } else {
+                    token_array[token_ref-1].Aoperator = AOperator_sub;
+                }              
             }
             else if(self[i] == '*') {
                 token_array[token_ref-1].Aoperator = AOperator_mul;
@@ -124,6 +133,7 @@ token_t* Kim_calculator_load(const char* self, i32* OUT_num)
             }
             else if(self[i] == '(') {
                 token_array[token_ref].bracket_before_num += 1;
+                allow_unary = 1;
             }
             else if(self[i] == ')') {
                 token_array[token_ref-1].bracket_after_num += 1;
