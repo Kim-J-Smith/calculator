@@ -117,7 +117,7 @@ token_t* Kim_calculator_load(const char* self, i32* OUT_num)
                 token_array[token_ref-1].Aoperator = AOperator_sub;
             }
             else if(self[i] == '*') {
-                token_array[token_ref-1].Aoperator = AOperator_muti;
+                token_array[token_ref-1].Aoperator = AOperator_mul;
             }
             else if(self[i] == '/') {
                 token_array[token_ref-1].Aoperator = AOperator_div;
@@ -151,7 +151,7 @@ token_t* Kim_calculator_load(const char* self, i32* OUT_num)
 /**
  * @attention only private use
  */
-static inline void pri_token_muti(token_t* now, token_t* next)
+static inline void pri_token_mul(token_t* now, token_t* next)
 {
     if(now->flag_int_or_float == Type_int) {
         if(next->flag_int_or_float == Type_int) {
@@ -301,8 +301,8 @@ void Kim_calculator_run(token_t* token_array, i32 array_length)
             break; /* go to the handler of + and - */
         }
         /* Then, the '*' and '/' */
-        else if(token_array[i].Aoperator == AOperator_muti) {
-            pri_token_muti(token_array + i, token_array + i + add_to_next);
+        else if(token_array[i].Aoperator == AOperator_mul) {
+            pri_token_mul(token_array + i, token_array + i + add_to_next);
         }
         else if(token_array[i].Aoperator == AOperator_div) {
             pri_token_div(token_array + i, token_array + i + add_to_next);

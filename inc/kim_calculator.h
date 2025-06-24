@@ -15,7 +15,7 @@ typedef unsigned long long  u64;
 typedef enum {
     AOperator_add = (1 << 0),
     AOperator_sub = (1 << 1),
-    AOperator_muti = (1 << 2),
+    AOperator_mul = (1 << 2),
     AOperator_div = (1 << 3),
     AOperator_null = 0
 }Arith_operator_t;
