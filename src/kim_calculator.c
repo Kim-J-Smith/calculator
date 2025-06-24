@@ -49,7 +49,9 @@ static inline i32 pri_count(const char* self)
  * @fn      Kim_calculator_load
  * @brief   Parse string content and then store them into a array
  * @param   self the string
+ * @param   OUT_num [OUT] the number of numbers in the string
  * @retval  the pointer of array 
+ * @attention the array is alloced in heap, remember to free it!
  */
 token_t* Kim_calculator_load(const char* self, i32* OUT_num)
 {
@@ -262,10 +264,18 @@ static inline void pri_token_sub(token_t* now, token_t* next)
     now->next_pos += 1 + next->next_pos;
 }
 
-static void Kim_calculator_run(token_t* token_array, i32 array_length)
+/**
+ * @fn      Kim_calculator_run
+ * @attention recursive call
+ * @brief   deal with the token_array
+ * @param   token_array the token array pointer
+ * @param   array_length the length of token array
+ * @retval  None
+ */
+void Kim_calculator_run(token_t* token_array, i32 array_length)
 {
-    for(i32 i = 0; i < array_length; ) {
-        /* Firstly, deal with the '()' */
+    /* Firstly, deal with the '()' */
+    for(i32 i = 0; i < array_length; ) { 
         if(token_array[i].bracket_before_num >= (u16)1) {
             token_array[i].bracket_before_num --;
             Kim_calculator_run(token_array + i, array_length - i);
@@ -279,7 +289,7 @@ static void Kim_calculator_run(token_t* token_array, i32 array_length)
         }
     }
 
-    /* handler for '*' '/' */
+    /* Then, the handler for '*' '/' */
     for(i32 i = 0; i < array_length; ) {
         i32 add_to_next = 1 + token_array[i].next_pos;
 
@@ -299,7 +309,7 @@ static void Kim_calculator_run(token_t* token_array, i32 array_length)
         }
     }
 
-    /* handler for ')' '+' '-' */
+    /* Finally, the handler for ')' '+' '-' */
     for(i32 i = 0; i < array_length; ) {
         i32 add_to_next = 1 + token_array[i].next_pos;
 
@@ -324,18 +334,37 @@ static void Kim_calculator_run(token_t* token_array, i32 array_length)
     return;
 }
 
-
+/**
+ * @fn      Kim_calculator
+ * @brief   Parse the string, and then give the result
+ * @param   _string the string
+ * @retval  the result, with type and value
+ */
 calculator_result_t Kim_calculator(const char* _string)
 {
     i32 _num = 0;
+    calculator_result_t the_result;
     token_t* _tmp = Kim_calculator_load(_string, &_num);
 
+    /* except hander */
+    if(_tmp == NULL) {
+        the_result.There_is_something_wrong = 1; /* no alloc */
+        the_result.data.int_data = 0;
+        the_result.flag_int_or_float = Type_int;
+        return the_result;
+    }
+    /* except hander */
+    if(_num == 0) {
+        the_result.There_is_something_wrong = 2; /* 0 number */
+        the_result.data.int_data = 0;
+        the_result.flag_int_or_float = Type_int;
+        return the_result;
+    }
     Kim_calculator_run(_tmp, _num);
 
-    calculator_result_t the_result;
     the_result.flag_int_or_float = _tmp[0].flag_int_or_float; 
-
     the_result.data.int_data = _tmp[0].data.int_data;
+    the_result.There_is_something_wrong = 0;
     free(_tmp);
     return the_result;
 }
