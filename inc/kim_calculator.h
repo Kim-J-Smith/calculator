@@ -62,9 +62,11 @@ typedef struct {
     u32 There_is_something_wrong; /* not 0 means something wrong happened */
 }calculator_result_t;
 
-# ifndef NULL
+#ifdef __cplusplus
+    #define NULL nullptr
+#else
     #define NULL ((void*)0)
-# endif /* NULL */
+#endif /* __cplusplus */
 
 #ifdef __cplusplus
 extern "C" {
