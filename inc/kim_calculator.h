@@ -1,4 +1,11 @@
-# pragma once
+/**
+ * @file        kim_calculator.h 
+ * @author      Kim
+ * @version     0.1.0
+ * @date        2025-6-26
+ */
+# ifndef KIM_CALCULATOR_H
+# define KIM_CALCULATOR_H
 
 /* typedef of different int type */
 typedef char                i8;
@@ -13,10 +20,10 @@ typedef unsigned long long  u64;
 
 /* typedef of a enum to indicate the arithmetic operator */
 typedef enum {
-    AOperator_add = (1 << 0),
-    AOperator_sub = (1 << 1),
-    AOperator_mul = (1 << 2),
-    AOperator_div = (1 << 3),
+    AOperator_add = 1,
+    AOperator_sub = 2,
+    AOperator_mul = 3,
+    AOperator_div = 4,
     AOperator_null = 0
 }Arith_operator_t;
 
@@ -70,6 +77,12 @@ typedef struct {
     #endif /* NULL (avoid re-definition) */
 #endif /* __cplusplus */
 
+
+
+/* -------------------------------------------------------------------------------- */
+/* ------------------------------- FUNCTIONS -------------------------------------- */
+/* -------------------------------------------------------------------------------- */
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -83,3 +96,5 @@ extern void Kim_calculator_error_get(u32 error_num, char* buffer, u32 buffer_siz
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+# endif /* KIM_CALCULATOR_H */

@@ -1,6 +1,12 @@
-# include "kim_calculator.h"
+/**
+ * @file        kim_calculator.c
+ * @author      Kim
+ * @version     0.1.0
+ * @date        2025-6-26
+ */
 # include <stdlib.h>
 # include <string.h>
+# include "kim_calculator.h"
 
 #ifdef __cplusplus
 extern "C" {
