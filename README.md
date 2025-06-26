@@ -1,7 +1,4 @@
 # calculator 
-
----
-
 C language (just a tiny function. You can add it to you project smoothly.)
 
 ### English
