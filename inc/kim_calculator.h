@@ -65,7 +65,9 @@ typedef struct {
 #ifdef __cplusplus
     #define NULL nullptr
 #else
-    #define NULL ((void*)0)
+    #ifndef NULL
+        #define NULL ((void*)0)
+    #endif /* NULL (avoid re-definition) */
 #endif /* __cplusplus */
 
 #ifdef __cplusplus
@@ -74,7 +76,9 @@ extern "C" {
 
 extern calculator_result_t Kim_calculator(const char* _string);
 extern token_t* Kim_calculator_load(const char* self, i32* OUT_num);
+extern i32 Kim_calculator_check_bracket(const token_t* token_array, u32 array_length);
 extern void Kim_calculator_run(token_t* token_array, i32 array_length);
+extern void Kim_calculator_error_get(u32 error_num, char* buffer, u32 buffer_size);
 
 #ifdef __cplusplus
 }

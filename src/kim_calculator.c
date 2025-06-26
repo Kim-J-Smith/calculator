@@ -76,7 +76,7 @@ token_t* Kim_calculator_load(const char* self, i32* OUT_num)
     u64 _tmp_number = 0;
     for(u32 i = 0; self[i] != '\0'; i++) {
         if(flag_is_number == 1) {
-            /* in number */
+            /* now, is in number */
             if(self[i] >= '0' && self[i] <= '9') {
                 _tmp_number = (_tmp_number*10) + (self[i] - '0');
                 if(flag_has_point) {
@@ -108,7 +108,7 @@ token_t* Kim_calculator_load(const char* self, i32* OUT_num)
             }
         }
         else {
-            /* not in number */
+            /* now, is not in number */
             if(self[i] >= '0' && self[i] <= '9') {
                 i--;
                 flag_is_number = 1;
@@ -118,6 +118,7 @@ token_t* Kim_calculator_load(const char* self, i32* OUT_num)
                 token_array[token_ref-1].Aoperator = AOperator_add;
             }
             else if(self[i] == '-') {
+                /* check whether '-' means subtract or just negative single */
                 if(allow_unary == 1) {
                     flag_negative += 1;
                     allow_unary = 0;
@@ -349,10 +350,39 @@ void Kim_calculator_run(token_t* token_array, i32 array_length)
 }
 
 /**
+ * @fn      Kim_calculator_check_bracket
+ * @brief   check the match of the token array
+ * @param   token_array the token array
+ * @param   array_length the length of the token array
+ * @retval  0 means match_success; others means something wrong. 
+ *          @c `1`: more ')' @c `2`: more '('
+ */
+i32 Kim_calculator_check_bracket(const token_t* token_array, u32 array_length)
+{
+    u32 i = 0;
+    i32 num_before_bracket = 0;
+    for(i = 0; i < array_length; i++) {
+        num_before_bracket += (i32)token_array[i].bracket_before_num;
+        num_before_bracket -= (i32)token_array[i].bracket_after_num;
+
+        if(num_before_bracket < 0) {
+            return 1; /* more ')' */
+        }
+    }
+
+    if(num_before_bracket != 0) {
+        return 2; /* more '(' */
+    }
+    return 0; /* everything goes well */
+}
+
+/**
  * @fn      Kim_calculator
  * @brief   Parse the string, and then give the result
  * @param   _string the string
- * @retval  the result, with type and value
+ * @retval  the result, with type, value, and except_flag
+ * @note    `There_is_something_wrong` member value of return struct contain 
+ *          the except_number @c `1`: no alloc @c `2`: 0 number @c `3`: "()" problem
  */
 calculator_result_t Kim_calculator(const char* _string)
 {
@@ -360,16 +390,24 @@ calculator_result_t Kim_calculator(const char* _string)
     calculator_result_t the_result;
     token_t* _tmp = Kim_calculator_load(_string, &_num);
 
-    /* except hander */
+    /* except handler */
     if(_tmp == NULL) {
         the_result.There_is_something_wrong = 1; /* no alloc */
         the_result.data.int_data = 0;
         the_result.flag_int_or_float = Type_int;
         return the_result;
     }
-    /* except hander */
+    /* except handler */
     if(_num == 0) {
         the_result.There_is_something_wrong = 2; /* 0 number */
+        the_result.data.int_data = 0;
+        the_result.flag_int_or_float = Type_int;
+        return the_result;
+    }
+    /* except handler*/
+    if( Kim_calculator_check_bracket(_tmp, _num) ) {
+        free(_tmp); /* free the memory */
+        the_result.There_is_something_wrong = 3; /* "()" problem */
         the_result.data.int_data = 0;
         the_result.flag_int_or_float = Type_int;
         return the_result;
@@ -381,6 +419,37 @@ calculator_result_t Kim_calculator(const char* _string)
     the_result.There_is_something_wrong = 0;
     free(_tmp);
     return the_result;
+}
+
+/**
+ * @fn      Kim_calculator_error_get
+ * @brief   get the error information of the result
+ * @param   error_num the calculator_result_t.There_is_something_wrong
+ * @param   OUT_information [OUT] the char array to get the error information
+ * @param   info_max_size the size of the char array
+ * @retval  None
+ */
+void Kim_calculator_error_get(u32 error_num, char* OUT_information, u32 info_max_size)
+{
+    if(OUT_information == NULL) { return; }
+    switch (error_num)
+    {
+    case 0:
+        memcpy(OUT_information, "[calculator-error-number] success", info_max_size);
+        break;
+    case 1:
+        memcpy(OUT_information, "[calculator-error-number] no alloc memory", info_max_size);
+        break;
+    case 2:
+        memcpy(OUT_information, "[calculator-error-number] cannot parse number", info_max_size);
+        break;
+    case 3:
+        memcpy(OUT_information, "[calculator-error-number] '()' problem", info_max_size);
+        break;
+    default:
+        memcpy(OUT_information, "[calculator-error-number] unknown error", info_max_size);
+        break;
+    }
 }
 
 #ifdef __cplusplus
